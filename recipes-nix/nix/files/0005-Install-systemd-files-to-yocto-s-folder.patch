@@ -1,0 +1,21 @@
+From 8aa36f61de5e9652a8a81d4e2baed11aa9b0c9ef Mon Sep 17 00:00:00 2001
+From: Nigel Whillier <nigel.w@nosun.ca>
+Date: Wed, 23 Mar 2022 08:25:04 -0600
+Subject: [PATCH] Install systemd files to yocto's folder
+
+---
+ misc/systemd/local.mk | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/misc/systemd/local.mk b/misc/systemd/local.mk
+index 1fa037485..86da46bde 100644
+--- a/misc/systemd/local.mk
++++ b/misc/systemd/local.mk
+@@ -1,6 +1,6 @@
+ ifdef HOST_LINUX
+ 
+-  $(foreach n, nix-daemon.socket nix-daemon.service, $(eval $(call install-file-in, $(d)/$(n), $(prefix)/lib/systemd/system, 0644)))
++  $(foreach n, nix-daemon.socket nix-daemon.service, $(eval $(call install-file-in, $(d)/$(n), $(systemd_system_unitdir), 0644)))
+ 
+   clean-files += $(d)/nix-daemon.socket $(d)/nix-daemon.service
+ 
