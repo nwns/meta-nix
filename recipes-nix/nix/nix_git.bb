@@ -18,14 +18,3 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=fbc093901857fcd118f065f900982c24 "
 # Set S because we are using git not an extracted tarball
 S = "${WORKDIR}/git"
 
-# .SO libs are for runtime not dev
-FILES_SOLIBSDEV="" 
-FILES:${PN}-zsh = " ${datadir_native}/zsh/site-functions/_nix "
-FILES:${PN}-bash = " ${datadir_native}/bash-completion/completions/nix "
-FILES:${PN}-fish = " ${datadir_native}/fish/vendor_completions.d/nix.fish "
-FILES:${PN} += " ${systemd_system_unitdir}/nix-daemon.service ${systemd_system_unitdir}/nix-daemon.socket "
-
-# Should probably move these to the arch libdir
-FILES:${PN} += " ${nonarch_libdir}/*.so "
-
-PACKAGE_BEFORE_PN = " ${PN}-zsh ${PN}-bash ${PN}-fish "
