@@ -5,23 +5,17 @@ Please see the corresponding sections below for details.
 Dependencies
 ============
 
-  URI: <first dependency>
-  branch: <branch name>
+  URI: git://git.yoctoproject.org/poky
+  branch: honister
 
-  URI: <second dependency>
-  branch: <branch name>
-
-  .
-  .
-  .
+  URI: https://github.com/openembedded/meta-openembedded.git
+  branch: honister
 
 Patches
 =======
 
-Please submit any patches against the meta-nix layer to the xxxx mailing list (xxxx@zzzz.org)
-and cc: the maintainer:
-
-Maintainer: XXX YYYYYY <xxx.yyyyyy@zzzzz.com>
+Please submit any patches against the meta-nix layer as pull requests on
+https://github.com/nwns/meta-nix
 
 Table of Contents
 =================
