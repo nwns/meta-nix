@@ -96,7 +96,7 @@ if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
 fi
 # End Nix
 EOF
-    install -dv ${D}/etc/profile.d
+    install -m 0664 -D -t ${D}${sysconfdir}/profile.d ${WORKDIR}/nix.sh
     install -m 0664 -D -t ${D}${systemd_system_unitdir} \
         ${NIX_INSTALLED_NIX}/lib/systemd/system/nix-daemon.service \
         ${NIX_INSTALLED_NIX}/lib/systemd/system/nix-daemon.socket
