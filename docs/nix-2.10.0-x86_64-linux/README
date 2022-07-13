@@ -1,0 +1,6 @@
+The shell files in this directory are archived for reference
+from the Nix project.
+
+The scripts in this directory were obtained by downloading the
+archive that the nix_install.sh script in the directory above
+would have downloaded upon execution.

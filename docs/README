@@ -1,0 +1,5 @@
+The shell files in this directory are archived for reference
+from the Nix project. And remain under the Nix Project License.
+
+nix_install.sh was obtained using
+`curl -L https://nixos.org/nix/install -o nix_install.sh`

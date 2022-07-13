@@ -1,0 +1,12 @@
+[Unit]
+Description=Do first run tasks for nix
+Requires=mount-nix.service
+After=mount-nix.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/libexec/firstrun-nix
+RemainAfterExit=true
+
+[Install]
+WantedBy=nix-daemon.service

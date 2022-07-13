@@ -3,52 +3,27 @@ DESCRIPTION = "Nix, the purely functional package manager"
 LICENSE = "LGPLv2.1"
 
 DEPENDS:append = " \
-autoconf-archive-native \
-automake-native \
-gnulib-native \
-bash \
-bison-native \
-boost \
-brotli \
-bzip2 \
-curl \
-editline \
-flex \
 tar \
-gzip \
-jq-native \
-zlib \
-libarchive \
-libsodium \
-nlohmann-json \
-openssl \
-perl \
-pkgconfig \
-sqlite \
 xz \
-googletest \
-lowdown-native \
-lowdown \
 "
 
 #TODO(nigel) fix out of tree autotools
-inherit autotools-brokensep pkgconfig useradd systemd
+inherit base useradd systemd
 
-# TODO(nigel) disable bdwgc since it is optional and they seem to have moved the includes around
-# between 8.0.6 and master
-CONFIGUREOPTS:append = " --disable-cpuid --disable-gc "
 
 FILES:${PN}-zsh = " ${datadir_native}/zsh/site-functions/_nix "
 FILES:${PN}-bash = " ${datadir_native}/bash-completion/completions/nix "
 FILES:${PN}-fish = " ${datadir_native}/fish/vendor_completions.d/nix.fish "
 FILES:${PN} += " ${systemd_system_unitdir}/nix-daemon.service ${systemd_system_unitdir}/nix-daemon.socket "
-FILES:${PN} += " /nix/* "
+FILES:${PN} += " /nix/* /root/.nix-channels /usr/share/.reginfo"
 CONFFILES:${PN} = "${sysconfdir}/nix/nix.conf"
+
+SRC_URI += "file://firstrun-nix file://firstrun-nix.service"
 
 PACKAGE_BEFORE_PN = " ${PN}-zsh ${PN}-bash ${PN}-fish "
 
 SYSTEMD_AUTO_ENABLE = "enable"
-SYSTEMD_SERVICE:${PN} = "nix-daemon.service nix-daemon.socket"
+SYSTEMD_SERVICE:${PN} = "nix-daemon.service nix-daemon.socket firstrun-nix.service"
 
 USERADD_PACKAGES = "nix"
 
@@ -89,17 +64,60 @@ USERADD_PARAM:${PN} = " \
     "
 
 do_install:append() {
+    NIX_INSTALLED_NIX=$(find ${S} -name '*-nix-*')
+    # Make basic directory structure of Nix (part 1)
     install -dv -m 0755 ${D}nix ${D}/nix/var ${D}/nix/var/log ${D}/nix/var/log/nix
     install -dv -m 0755 ${D}/nix/var/log/nix/drvs 
     install -dv -m 0755 ${D}/nix/var/nix/db ${D}/nix/var/nix/gcroots
     install -dv -m 0755 ${D}/nix/var/nix/profiles ${D}/nix/var/nix/temproots
     install -dv -m 0755 ${D}/nix/var/nix/userpool ${D}/nix/var/nix/daemon-socket
     install -dv -m 0755 ${D}/nix/var/nix/gcroots/per-user ${D}/nix/var/nix/profiles/per-user
+    # Make basic directory structure of Nix (part 2)
     install -dv -g nixbld -m 1775 ${D}/nix/store
+    # Make place the default nix daemon configuration (part 1)
     install -dv -m 0555 ${D}/etc/nix
+
+    # place_channel_configuration
+    echo "https://nixos.org/channels/nixos-unstable nixpkgs" > ${WORKDIR}/.nix-channels
+    install -dv -m 0755 ${D}${ROOT_HOME}
+    install -m 0664 "${WORKDIR}/.nix-channels" "${D}${ROOT_HOME}/.nix-channels"
+
+    # First run tasks for nix are in the firstrun-nix service
+
+    # install_from_extracted_nix
+    cp -RPp ./store/* ${D}/nix/store/
+    chmod -R ugo-w ${D}/nix/store/
+    chown root:root -R ${D}/nix/store/
+
+    cat <<EOF >${WORKDIR}/nix.sh
+# Nix
+if [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+fi
+# End Nix
+EOF
+    install -dv ${D}/etc/profile.d
+    install -m 0664 -D -t ${D}${systemd_system_unitdir} \
+        ${NIX_INSTALLED_NIX}/lib/systemd/system/nix-daemon.service \
+        ${NIX_INSTALLED_NIX}/lib/systemd/system/nix-daemon.socket
+
+    install -m 0644 -D -t ${D}${systemd_unitdir}/system ${WORKDIR}/firstrun-nix.service
+    install -m 0755 -D -t ${D}${libexecdir} ${WORKDIR}/firstrun-nix
+    install -m 0644 -D ${S}/.reginfo ${D}${datadir}/nix/reginfo
+
+
+    #TODO(nwns) Do we need to configure systemd tempfiles?
+    # /etc/tmpfiles.d/nix-daemon.conf
 
     cat <<EOF >${WORKDIR}/nix.conf
 build-users-group = nixbld
 EOF
     install -m 0664 "${WORKDIR}/nix.conf" ${D}/etc/nix/nix.conf
 }
+
+
+INHIBIT_PACKAGE_STRIP = "1"
+INHIBIT_SYSROOT_STRIP = "1"
+INHIBIT_PACKAGE_DEBUG_SPLIT = "1"
+do_package_qa[noexec] = "1"
+EXCLUDE_FROM_SHLIBS = "1"

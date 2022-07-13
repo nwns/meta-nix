@@ -32,4 +32,7 @@ Run 'bitbake-layers add-layer meta-nix'
 II. Misc
 ========
 
---- replace with specific information about the meta-nix layer ---
+NOTE: Currently only Linux x86_64 is supported.
+
+NOTE: This layer installs nix into a baked image by following the process
+outlined by the projects installer script as provided on the webserver.

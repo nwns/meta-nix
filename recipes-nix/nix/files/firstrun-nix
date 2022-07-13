@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# Create and mount the ephemeral swap on the boot device
+set -o xtrace
+set -o errexit
+set -o nounset
+set -o pipefail
+
+# /nix/store/n44v3adn4442383d2s5p8y9rdahgdlx9-nix-2.10.0
+readonly NIX_INSTALLED_NIX=$(find /nix/store -name '*-nix-*')
+# /nix/store/6522l96q7d6yk848w5nr3gim901qysf6-nss-cacert-3.77
+readonly NIX_INSTALLED_CACERT=$(find /nix/store -name '*-nss-cacert-*')
+
+$NIX_INSTALLED_NIX/bin/nix-store --load-db < /usr/share/nix/reginfo
+$NIX_INSTALLED_NIX/bin/nix-env -i "$NIX_INSTALLED_CACERT"
+$NIX_INSTALLED_NIX/bin/nix-env -i "$NIX_INSTALLED_NIX"
+$NIX_INSTALLED_NIX/bin/nix-channel --update nixpkgs
+
+systemctl mask firstrun-nix.service
+
+exit 0
