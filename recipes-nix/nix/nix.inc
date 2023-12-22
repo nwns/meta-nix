@@ -6,9 +6,10 @@ DEPENDS:append = " \
 tar \
 xz \
 "
+HOSTTOOLS += "xz"
 
 #TODO(nigel) fix out of tree autotools
-inherit base useradd systemd
+inherit useradd systemd
 
 
 FILES:${PN}-zsh = " ${datadir_native}/zsh/site-functions/_nix "
@@ -67,7 +68,7 @@ do_install:append() {
     NIX_INSTALLED_NIX=$(find ${S} -name '*-nix-*')
     # Make basic directory structure of Nix (part 1)
     install -dv -m 0755 ${D}nix ${D}/nix/var ${D}/nix/var/log ${D}/nix/var/log/nix
-    install -dv -m 0755 ${D}/nix/var/log/nix/drvs 
+    install -dv -m 0755 ${D}/nix/var/log/nix/drvs
     install -dv -m 0755 ${D}/nix/var/nix/db ${D}/nix/var/nix/gcroots
     install -dv -m 0755 ${D}/nix/var/nix/profiles ${D}/nix/var/nix/temproots
     install -dv -m 0755 ${D}/nix/var/nix/userpool ${D}/nix/var/nix/daemon-socket
